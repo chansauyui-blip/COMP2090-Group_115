@@ -1,0 +1,21 @@
+1. How to Run the BFS Code
+Open Python in your device
+Copy and paste the entire BFS code into a new file
+Save the file.
+Run the program .
+
+2. Main Components
+bfs(graph, start) → Main function that performs BFS.
+graph → Adjacency list (dictionary) showing connections.
+start → Starting vertex (e.g., 'A').
+
+3. How to Use the Code (Step-by-Step)
+  1.Define your graph
+    Create connections using the edges list (undirected graph).
+  2.Build the adjacency list
+    The code automatically converts edges into a graph.
+  3.Call the BFS function
+    "result = bfs(graph, 'A')" 
+    "print("BFS visit order:", result)"
+  4.Run the program
+The code will print the order in which nodes are visited.
