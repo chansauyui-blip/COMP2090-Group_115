@@ -1,0 +1,79 @@
+1. What is this system?
+This is a simple but smart online shopping website where you can:
+Browse products
+Add items to cart
+Choose how to ship different-sized items (together or separately)
+Pick a delivery speed (Standard / Express / Premium)
+See exact arrival dates and total cost
+Complete checkout (stock is automatically reduced)
+
+2. How to Start the System
+Step 1: Start the server
+
+Open your terminal / command prompt.
+Install Flask using "pip install flask"
+Go to the project folder (the folder that contains app.py).
+Type this command and press Enter:python app.py
+
+You will see a message like:
+Running on http://127.0.0.1:5000
+Step 2: Open the website
+Open any web browser and go to this address:
+http://127.0.0.1:5000
+The homepage will load automatically.
+
+3. How to Use the Website
+Step 1: Browse Products
+You will see all available items with name, type, size, price, and current stock.
+Stock numbers are shown in red.
+
+Step 2: Add Items to Cart
+For any product you want, enter the quantity.
+Click the green “Add to Cart” button.
+Repeat for other items.
+
+Step 3: Manage Your Cart
+Scroll down to the “Your Cart” section.
+You can see everything you added.
+Click the red “Remove” button if you want to delete an item.
+
+Step 4: Choose Shipping Option (only appears if you have different sizes)
+If your cart has items of different sizes (e.g. sofa + smartphone), you will see the Shipping Option section.
+Choose:
+Together → All items arrive on the same day (based on the largest item)
+Separately → Each item arrives on its own day (smaller items arrive faster)
+
+Click “Confirm Shipping Option”.
+
+Step 5: Choose Transport Plan
+Scroll to the Transport Plan section.
+Pick one of the three plans:
+Standard ($9.99)
+Express ($19.99)
+Premium ($39.99) – fastest option
+
+Click “Select Plan”.
+
+Step 6: Check Order Summary
+Scroll to the Order Summary section.
+You will see:
+Subtotal
+Transport cost (charged only once for the largest item)
+Total price
+Estimated arrival date(s)
+
+
+Step 7: Checkout
+Click the big “Checkout” button.
+A success page will appear with your full order details.
+Click “Go back for purchasing” to return to the shop.
+You will notice the stock of purchased items has decreased.
+
+Important Notes
+
+Transport cost is charged only once based on the largest item (realistic shipping rule).
+Arrival dates are calculated from today’s date.
+Inventory is updated automatically after every successful checkout.
+If an item’s stock reaches 0, it is still shown (future improvement will hide sold-out items).
+
+Done!
