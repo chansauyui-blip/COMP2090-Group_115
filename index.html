@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Purchase System</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 20px auto; padding: 0 20px; }
+        .section { border: 1px solid #ddd; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        h2 { color: #333; }
+        .item, .cart-item, .transport-option, .shipping-option { margin: 10px 0; padding: 10px; background: #f9f9f9; border-radius: 3px; }
+        button { background: #4CAF50; color: white; padding: 8px 15px; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #45a049; }
+        .remove-btn { background: #f44336; }
+        .remove-btn:hover { background: #da190b; }
+        .go-back-btn { background: #2196F3; font-size: 1.1em; padding: 12px 30px; margin-top: 20px; }
+        .go-back-btn:hover { background: #0b7dda; }
+        .summary { font-size: 1.1em; font-weight: bold; }
+        .order-success { background: #dff0d8; padding: 20px; border-radius: 5px; color: #3c763d; }
+        .stock-bold { color: #d32f2f; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🛒 Purchase System</h1>
+
+    {% if order_summary %}
+    <div class="order-success">
+        <h2>✅ Order Placed Successfully!</h2>
+        <p><strong>Items:</strong></p>
+        <ul>
+            {% for item in order_summary.order_items %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+        <p><strong>Transport Plan:</strong> {{ order_summary.transport_plan }}</p>
+        <p><strong>Shipping Option:</strong> {{ order_summary.shipping_option }}</p>
+        <p><strong>Subtotal:</strong> ${{ "%.2f"|format(order_summary.subtotal) }}</p>
+        <p><strong>Transport Cost:</strong> ${{ "%.2f"|format(order_summary.transport) }}</p>
+        <p class="summary"><strong>Final Total:</strong> ${{ "%.2f"|format(order_summary.total) }}</p>
+        <p class="summary"><strong>Estimated Arrival(s):</strong></p>
+        <ul>
+            {% for date in order_summary.arrival_dates %}
+            <li>{{ date }}</li>
+            {% endfor %}
+        </ul>
+        <a href="/">
+            <button class="go-back-btn">🔙 Go back for purchasing</button>
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="section" id="items-section">
+        <h2>📦 Available Items</h2>
+        {% for item in items %}
+        <div class="item">
+            <strong>{{ item.get_name() }}</strong><br>
+            Type: {{ item.get_product_type() }} | Size: {{ item.get_size() }} | Price: ${{ "%.2f"|format(item.get_price()) }} | Stock: <span class="stock-bold">{{ item.get_quantity() }}</span>
+            <form method="POST" action="{{ url_for('add_to_cart') }}" style="margin-top: 8px;">
+                <input type="hidden" name="item_id" value="{{ item.get_item_id() }}">
+                <input type="number" name="quantity" value="1" min="1" max="{{ item.get_quantity() }}" style="width: 60px;">
+                <button type="submit">Add to Cart</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="section" id="cart-section">
+        <h2>🛍️ Your Cart</h2>
+        {% if cart %}
+            {% for item in cart %}
+            <div class="cart-item">
+                {{ item.quantity }}x {{ item.product.get_name() }} (Size: {{ item.get_size() }}) - ${{ "%.2f"|format(item.get_subtotal()) }}
+                <a href="{{ url_for('remove_from_cart', item_id=item.product.get_item_id()) }}" style="float: right;">
+                    <button class="remove-btn">Remove</button>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>Cart is empty</p>
+        {% endif %}
+    </div>
+
+    {% if cart and has_multiple_sizes %}
+    <div class="section" id="shipping-section">
+        <h2>📦 Shipping Option</h2>
+        <p>You have items of different sizes. Do you want to ship them <strong>separately</strong> (different arrival dates) or <strong>together</strong> (all arrive on the largest item's date)?</p>
+        <form method="POST" action="{{ url_for('set_shipping') }}">
+            <div class="shipping-option">
+                <input type="radio" id="together" name="separate" value="no" {% if not ship_separately %}checked{% endif %}>
+                <label for="together"><strong>Together</strong> (All items arrive on the largest item's date)</label>
+            </div>
+            <div class="shipping-option">
+                <input type="radio" id="separate" name="separate" value="yes" {% if ship_separately %}checked{% endif %}>
+                <label for="separate"><strong>Separately</strong> (Each item has its own arrival date)</label>
+            </div>
+            <button type="submit" style="margin-top: 10px;">Confirm Shipping Option</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if cart %}
+    <div class="section" id="transport-section">
+        <h2>🚚 Transport Plan (Applied to ALL items)</h2>
+        <p><em>Note: You only pay for the largest item's transport cost!</em></p>
+        <form method="POST" action="{{ url_for('select_transport') }}">
+            {% for plan in transports %}
+            <div class="transport-option">
+                <input type="radio" id="plan{{ plan.get_plan_id() }}" name="plan_id" value="{{ plan.get_plan_id() }}" {% if selected_plan_id == plan.get_plan_id() %}checked{% endif %}>
+                <label for="plan{{ plan.get_plan_id() }}">
+                    <strong>{{ plan.get_name() }}</strong> - ${{ "%.2f"|format(plan.get_base_price()) }} (Base: {{ plan.get_base_days() }} days)
+                </label>
+            </div>
+            {% endfor %}
+            <button type="submit" style="margin-top: 10px;">Select Plan</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if cart %}
+    <div class="section" id="summary-section">
+        <h2>💰 Order Summary</h2>
+        <p>Subtotal: ${{ "%.2f"|format(subtotal) }}</p>
+        <p>Transport Cost: ${{ "%.2f"|format(transport_cost) }}</p>
+        <p class="summary">Total: ${{ "%.2f"|format(total) }}</p>
+        {% if arrival_dates %}
+        <p class="summary">Estimated Arrival(s):</p>
+        <ul>
+            {% for date in arrival_dates %}
+            <li>{{ date }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <form method="POST" action="{{ url_for('checkout') }}" style="margin-top: 15px;">
+            <button type="submit" style="font-size: 1.1em; padding: 10px 25px;">Checkout</button>
+        </form>
+    </div>
+    {% endif %}
+</body>
+</html>
